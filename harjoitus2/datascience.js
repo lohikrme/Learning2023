@@ -44,7 +44,32 @@ d3.json("measures.json").then(
         console.log(maxHumidity)
         console.log(maxTemp)
 
+        // calculate average AirPressure for each day
+        var avgAirPressureByDay = d3.nest()
+            .key(d => d.day)
+            .rollup(v => d3.mean(v, d => d.AirPressure))
+            .entries(dataArray);
 
+        // create x-scale
+        var xScale = d3.scaleBand()
+            .domain(avgAirPressureByDay.map(d => d.key))
+            .range([0, width])
+            .padding(0.1);
+
+        // create y-scale
+        var yScale = d3.scaleLinear()
+            .domain([0, d3.max(avgAirPressureByDay, d => d.value)])
+            .range([height, 0]);
+
+        // create bars
+        svg.selectAll(".bar")
+            .data(avgAirPressureByDay)
+            .enter().append("rect")
+            .attr("class", "bar")
+            .attr("x", d => xScale(d.key))
+            .attr("y", d => yScale(d.value))
+            .attr("width", xScale.bandwidth())
+            .attr("height", d => height - yScale(d.value));
     }
 
 )
