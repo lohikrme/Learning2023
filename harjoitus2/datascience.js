@@ -2,12 +2,6 @@ const svg = d3.select("#svg-graph")
     .attr("width", "500px")
     .attr("height", "500px")
 
-svg.append("rect")
-    .attr("width", "100px")
-    .attr("height", "100px")
-    .attr("fill", "orange")
-
-
 d3.json("measures.json").then(
     loaded_data => {
         var dataArray = []
@@ -15,7 +9,6 @@ d3.json("measures.json").then(
             dataArray.push(loaded_data[i].Measures)
 
         }
-        console.log(dataArray)
 
         for (var i in dataArray) {
             dataArray[i].AirPressure = dataArray[i].AirPressure.replace(",", ".")
@@ -28,7 +21,30 @@ d3.json("measures.json").then(
             dataArray[i].Temp = parseFloat(dataArray[i].Temp)
         }
 
+        // console log how the data array looks now with replacements and float numbers
         console.log(dataArray)
+
+        // parse the timestamp to a date object
+        var parseTime = d3.timeParse("%a %b %d %H:%M:%S %Y"); // assuming timestamp is in "Fri Mar 15 21:42:29 2019" format
+        var formatTime = d3.timeFormat("%m-%Y"); // output format for month
+
+        // group the data by month
+        var nestedData = d3.nest()
+            .key(function (d) { return formatTime(parseTime(d.Timestamp)); }) // convert timestamp to date and then to string, keeping only the year and month
+            .entries(dataArray);
+
+        // calculate the monthly average for each measure
+        var monthlyAverage = nestedData.map(function (d) {
+            return {
+                month: d.key,
+                airPressure: d3.mean(d.values, function (v) { return v.AirPressure; }),
+                humidity: d3.mean(d.values, function (v) { return v.Humidity; }),
+                temp: d3.mean(d.values, function (v) { return v.Temp; })
+            };
+        });
+
+        // use the monthlyAverage array for your visualization
+        console.log(monthlyAverage)
 
         var minAirPressure = d3.min(dataArray.filter(d => d.AirPressure !== 0), d => d.AirPressure)
         var minHumidity = d3.min(dataArray.filter(d => d.Humidity !== 0), d => d.Humidity)
@@ -44,32 +60,6 @@ d3.json("measures.json").then(
         console.log(maxHumidity)
         console.log(maxTemp)
 
-        // calculate average AirPressure for each day
-        var avgAirPressureByDay = d3.nest()
-            .key(d => d.day)
-            .rollup(v => d3.mean(v, d => d.AirPressure))
-            .entries(dataArray);
-
-        // create x-scale
-        var xScale = d3.scaleBand()
-            .domain(avgAirPressureByDay.map(d => d.key))
-            .range([0, width])
-            .padding(0.1);
-
-        // create y-scale
-        var yScale = d3.scaleLinear()
-            .domain([0, d3.max(avgAirPressureByDay, d => d.value)])
-            .range([height, 0]);
-
-        // create bars
-        svg.selectAll(".bar")
-            .data(avgAirPressureByDay)
-            .enter().append("rect")
-            .attr("class", "bar")
-            .attr("x", d => xScale(d.key))
-            .attr("y", d => yScale(d.value))
-            .attr("width", xScale.bandwidth())
-            .attr("height", d => height - yScale(d.value));
     }
 
 )
