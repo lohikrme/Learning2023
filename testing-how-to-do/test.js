@@ -11,6 +11,23 @@ var temps = dataset.map(d => d.Temp); // create an array of Temp values
 const canvas_width = 230
 const canvas_height = 400
 
+var maxAirPressure = d3.max(dataset, d => d.AirPressure)
+var maxHumidity = d3.max(dataset, d => d.Humidity)
+var maxTemp = d3.max(dataset, d => d.Temp)
+
+var xScale = d3.scaleTime()
+    .domain(dataset.map(obj => obj.Timestamp))
+    .range([0, canvas_width])
+const yScaleForAirPressure = d3.scaleLinear()
+    .domain([0, 1200])
+    .range([canvas_height, 0])
+const yScaleForHumidity = d3.scaleLinear()
+    .domain([0, 100])
+    .range([0, canvas_height])
+const yScaleForTemp = d3.scaleLinear()
+    .domain([0, 50])
+    .range([0, canvas_height])
+
 // create the SVG image for Air Pressure
 var svg1 = d3.select("#svg-image-AirPressure")
     .attr("width", `${canvas_width}px`)
@@ -21,9 +38,9 @@ var rects1 = svg1.selectAll("rect") // select all rect elements
     .enter() // enter the data
     .append("rect") // append a rect for each value
     .attr("x", (d, i) => i * 50) // set the x position based on the index
-    .attr("y", d => canvas_height - d / 10 - 50) // set the y position based on the canvas height and value and some padding
+    .attr("y", d => 0) // set the y position based on the canvas height and value and some padding
     .attr("width", 40) // set the width to a fixed value
-    .attr("height", d => d / 10) // set the height based on the value
+    .attr("height", d => yScaleForAirPressure(d)) // set the height based on the value
     .attr("fill", "steelblue") // set the fill color to steelblue
     .attr("transform", "translate(70,0)") // move rects right a bit
 
@@ -46,9 +63,9 @@ var rects2 = svg2.selectAll("rect") // select all rect elements
     .enter() // enter the data
     .append("rect") // append a rect for each value
     .attr("x", (d, i) => i * 50) // set the x position based on the index
-    .attr("y", d => canvas_height - d / 10 - 50) // set the y position based on the canvas height and value and some padding
+    .attr("y", 0) // set the y position based on the canvas height and value and some padding
     .attr("width", 40) // set the width to a fixed value
-    .attr("height", d => d / 10) // set the height based on the value
+    .attr("height", d => yScaleForHumidity(d)) // set the height based on the value
     .attr("fill", "steelblue") // set the fill color to steelblue
     .attr("transform", "translate(70,0)") // move rects right a bit
 
@@ -71,9 +88,9 @@ var rects3 = svg3.selectAll("rect") // select all rect elements
     .enter() // enter the data
     .append("rect") // append a rect for each value
     .attr("x", (d, i) => i * 50) // set the x position based on the index
-    .attr("y", d => canvas_height - d * 10 - 50) // set the y position based on the canvas height and value and some padding
+    .attr("y", 0) // set the y position based on the canvas height and value and some padding
     .attr("width", 40) // set the width to a fixed value
-    .attr("height", d => d * 10) // set the height based on the value
+    .attr("height", d => yScaleForTemp(d)) // set the height based on the value
     .attr("fill", "steelblue") // set the fill color to steelblue
     .attr("transform", "translate(70,0)") // move rects right a bit
 
