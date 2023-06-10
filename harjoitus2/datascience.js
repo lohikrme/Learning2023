@@ -108,11 +108,11 @@ d3.json("measures.json").then(
 
         // add x-axis and y-axis to airpressure graphic
 
-        var Y_AxisForAirPressure = d3.axisLeft(y_airpressure).tickFormat(d3.format("d"))
+        var Y_Axis_AirPressure = d3.axisLeft(y_airpressure).tickFormat(d3.format("d"))
 
         svg_airpressure.append("g")
             .attr("class", "y-axis")
-            .call(Y_AxisForAirPressure)
+            .call(Y_Axis_AirPressure)
 
     }
 
